@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+:root { font-family: 'DM Sans', sans-serif; color: #102b2a; background: #f4f7f2; font-synthesis: none; }
+.font-display { font-family: 'Space Grotesk', sans-serif; }
+.font-display em { color: #de704b; font-style: normal; }
+.page-grid { position: fixed; inset: 0; opacity: .4; pointer-events: none; background-image: linear-gradient(#dbe6df 1px, transparent 1px), linear-gradient(90deg, #dbe6df 1px, transparent 1px); background-size: 44px 44px; mask-image: linear-gradient(to bottom, black, transparent 75%); }
+.brand-mark { width: 31px; height: 31px; display: grid; place-items: center; background: #de704b; border-radius: 50% 50% 50% 6px; transform: rotate(-18deg); }
+.brand-mark span { width: 11px; height: 11px; border: 2px solid #fff; border-radius: 50%; }
+.eyebrow, .section-kicker { display: flex; align-items: center; gap: 8px; letter-spacing: .12em; font-size: 10px; font-weight: 700; color: #de704b; }
+.panel { overflow: hidden; border: 1px solid #dbe6df; border-radius: 16px; background: rgba(255,255,255,.84); box-shadow: 0 20px 60px rgba(16,43,42,.06); }
+.drop-zone { border: 1px dashed #abc8bc; border-radius: 12px; background: #f7faf6; transition: .2s ease; }
+.drop-zone:hover, .drop-zone.is-dragging { border-color: #de704b; background: #fff9f6; transform: translateY(-2px); }
+.upload-icon { display: grid; place-items: center; width: 62px; height: 62px; border-radius: 50%; color: #de704b; background: #ffe8df; }
+.primary-action { min-height: 50px; border-radius: 10px; background: #de704b; color: white; font-weight: 700; transition: .2s ease; }
+.primary-action:hover:not(:disabled) { background: #c95e3d; transform: translateY(-1px); }
+.primary-action:disabled { cursor: wait; opacity: .7; }
+.stats-panel { min-height: 310px; border-radius: 16px; padding: 26px; color: white; background: #102b2a; box-shadow: 0 20px 60px rgba(16,43,42,.15); }
+.preview-frame { position: relative; display: flex; max-height: 470px; min-height: 250px; align-items: center; justify-content: center; overflow: hidden; border-radius: 11px; background: #132f2d; }
+.preview-frame img { display: block; max-height: 470px; width: 100%; object-fit: contain; }
+.bounding-box { position: absolute; border: 2px solid #de704b; pointer-events: none; }
+.bounding-box span { position: absolute; top: -23px; left: -2px; white-space: nowrap; border-radius: 4px 4px 0 0; background: #de704b; padding: 3px 7px; color: white; font-size: 10px; font-weight: 700; }
+.scanning-line { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: #aee4bd; box-shadow: 0 0 14px 3px #aee4bd; animation: scan 1.7s ease-in-out infinite; }
+@keyframes scan { 0%, 100% { transform: translateY(20px); opacity: 0; } 20%, 80% { opacity: 1; } 50% { transform: translateY(450px); } }
+.icon-button { display: grid; flex-shrink: 0; place-items: center; width: 34px; height: 34px; border-radius: 8px; color: #52706d; transition: .2s ease; }
+.icon-button:hover { background: #fff; color: #de704b; }
+.result-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid #e6eee8; padding-bottom: 13px; font-size: 14px; }
+.result-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.result-index { color: #de704b; font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; }
+.confidence { border-radius: 999px; background: #e8f3eb; padding: 4px 8px; color: #39735e; font-size: 11px; font-weight: 700; }
+.empty-results { display: flex; min-height: 100px; flex-direction: column; align-items: center; justify-content: center; gap: 9px; border: 1px dashed #d1e1d7; border-radius: 10px; color: #91a6a0; font-size: 13px; }
+.reveal { animation: rise .6s both; }
+.reveal-delay-1 { animation-delay: .08s; } .reveal-delay-2 { animation-delay: .16s; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 640px) { .stats-panel { min-height: 240px; } .preview-frame img { max-height: 360px; } }

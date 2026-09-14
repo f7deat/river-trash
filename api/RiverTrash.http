@@ -1,0 +1,6 @@
+@RiverTrash_HostAddress = http://localhost:5223
+
+GET {{RiverTrash_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,14 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/api/.vs
+/api/bin/Debug/net10.0
+/api/obj
+/api/RiverTrash.csproj.user
+/web/dist
+/web/node_modules
+/web/package-lock.json
+/web/src/App.jsx
+/api/bin/Release/net10.0
+/api/Properties/PublishProfiles
