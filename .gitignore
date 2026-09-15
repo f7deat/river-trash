@@ -9,6 +9,6 @@
 /web/dist
 /web/node_modules
 /web/package-lock.json
-/web/src/App.jsx
 /api/bin/Release/net10.0
 /api/Properties/PublishProfiles
+web/pnpm-lock.yaml

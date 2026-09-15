@@ -16,7 +16,8 @@ public class YoloInferenceService : IYoloInferenceService, IDisposable
 {
     private readonly InferenceSession _session;
     private readonly string[] _labels = new[] { "Plastic_Bottle", "Plastic_Bag", "Organic_Waste", "Other_Garbage", "PLASTIC_BAG", "PLASTIC_BOTTLE",
-    "OTHER_PLASTIC_WASTE", "OTHER_PLASTIC_WASTE" };
+    "OTHER_PLASTIC_WASTE", "OTHER_PLASTIC_WASTE",
+    "chai_nhua", "beo", "cay_co", "ca_chet", "canh_cay", "tui_rac", "sop"};
 
     public YoloInferenceService(IHostEnvironment env)
     {
@@ -138,7 +139,7 @@ public class YoloInferenceService : IYoloInferenceService, IDisposable
         if (boxes.Count > 0)
         {
             CvDnn.NMSBoxes(
-                boxes.Select(b => new Rect((int)b.X, (int)b.Y, (int)b.Width, (int)b.Height)),
+                boxes.Select(b => new Rect2d(b.X, b.Y, b.Width, b.Height)),
                 confidences,
                 scoreThreshold,
                 iouThreshold,
