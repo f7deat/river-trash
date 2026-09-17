@@ -15,14 +15,12 @@ public interface IYoloInferenceService
 public class YoloInferenceService : IYoloInferenceService, IDisposable
 {
     private readonly InferenceSession _session;
-    private readonly string[] _labels = new[] { "Plastic_Bottle", "Plastic_Bag", "Organic_Waste", "Other_Garbage", "PLASTIC_BAG", "PLASTIC_BOTTLE",
-    "OTHER_PLASTIC_WASTE", "OTHER_PLASTIC_WASTE",
-    "chai_nhua", "beo", "cay_co", "ca_chet", "canh_cay", "tui_rac", "sop"};
+    private readonly string[] _labels = new[] { "PLASTIC_BAG", "PLASTIC_BOTTLE", "OTHER_PLASTIC_WASTE", "NOT_PLASTIC_WASTE" };
 
     public YoloInferenceService(IHostEnvironment env)
     {
         // Đường dẫn tới file .onnx
-        string modelPath = Path.Combine(env.ContentRootPath, "Models", "yolov8_river_waste.onnx");
+        string modelPath = Path.Combine(env.ContentRootPath, "Models", "best.onnx");
 
         // Cấu hình ONNX Session
         var options = new Microsoft.ML.OnnxRuntime.SessionOptions();
@@ -35,6 +33,10 @@ public class YoloInferenceService : IYoloInferenceService, IDisposable
     {
         using var stream = imageFile.OpenReadStream();
         using var mat = Mat.FromStream(stream, ImreadModes.Color);
+        if (mat.Empty())
+        {
+            throw new ArgumentException("Không thể đọc file ảnh.");
+        }
 
         // 1. Pre-process: Resize về 640x640 chuẩn YOLO
         using var resizedMat = new Mat();
@@ -90,9 +92,20 @@ public class YoloInferenceService : IYoloInferenceService, IDisposable
         if (outputTensor == null) return detectedItems;
 
         // Dimensions thông thường: [1, 84, 8400] (Batch Size = 1, Attributes = 84, Boxes = 8400)
-        int dimensions = outputTensor.Dimensions[1]; // Số thuộc tính (4 + C)
-        int numAnchors = outputTensor.Dimensions[2]; // 8400 ô dự đoán
+        if (outputTensor.Dimensions.Length != 3)
+        {
+            return detectedItems;
+        }
+
+        bool attributesFirst = outputTensor.Dimensions[1] <= outputTensor.Dimensions[2];
+        int dimensions = attributesFirst ? outputTensor.Dimensions[1] : outputTensor.Dimensions[2];
+        int numAnchors = attributesFirst ? outputTensor.Dimensions[2] : outputTensor.Dimensions[1];
         int numClasses = dimensions - 4;            // Số lớp (Class Count)
+
+        if (dimensions <= 4 || numAnchors <= 0)
+        {
+            return detectedItems;
+        }
 
         var boxes = new List<Rect2f>();
         var confidences = new List<float>();
@@ -108,7 +121,9 @@ public class YoloInferenceService : IYoloInferenceService, IDisposable
             for (int c = 0; c < numClasses; c++)
             {
                 // Tọa độ truy cập Tensor 3D: [batch, row, col] -> [0, 4 + c, i]
-                float score = outputTensor[0, 4 + c, i];
+                float score = attributesFirst
+                    ? outputTensor[0, 4 + c, i]
+                    : outputTensor[0, i, 4 + c];
                 if (score > maxScore)
                 {
                     maxScore = score;
@@ -120,10 +135,10 @@ public class YoloInferenceService : IYoloInferenceService, IDisposable
             if (maxScore >= scoreThreshold)
             {
                 // Trích xuất tọa độ Bounding Box (Mặc định ở dạng Center X, Center Y, Width, Height)
-                float cx = outputTensor[0, 0, i];
-                float cy = outputTensor[0, 1, i];
-                float w = outputTensor[0, 2, i];
-                float h = outputTensor[0, 3, i];
+                float cx = attributesFirst ? outputTensor[0, 0, i] : outputTensor[0, i, 0];
+                float cy = attributesFirst ? outputTensor[0, 1, i] : outputTensor[0, i, 1];
+                float w = attributesFirst ? outputTensor[0, 2, i] : outputTensor[0, i, 2];
+                float h = attributesFirst ? outputTensor[0, 3, i] : outputTensor[0, i, 3];
 
                 // Chuyển đổi từ Center (cx, cy) sang Top-Left (x, y)
                 float x = cx - (w / 2.0f);

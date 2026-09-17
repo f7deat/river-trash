@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
+const MODEL_INPUT_SIZE = 640
 
 function formatBytes(bytes) {
   if (!bytes) return '0 KB'
@@ -32,6 +33,7 @@ function App() {
   const [isDragging, setIsDragging] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [hoveredItemIndex, setHoveredItemIndex] = useState(null)
 
   useEffect(() => {
     if (!file) {
@@ -46,6 +48,7 @@ function App() {
   function chooseFile(selectedFile) {
     setError('')
     setResult(null)
+    setHoveredItemIndex(null)
     if (!selectedFile) return
     if (!selectedFile.type.startsWith('image/')) {
       setError('Vui lòng chọn một tệp hình ảnh.')
@@ -62,6 +65,7 @@ function App() {
     setFile(null)
     setResult(null)
     setError('')
+    setHoveredItemIndex(null)
     if (inputRef.current) inputRef.current.value = ''
   }
 
@@ -136,12 +140,20 @@ function App() {
             ) : (
               <div className="p-5">
                 <div className="preview-frame">
-                  <img src={previewUrl} alt="Ảnh đã chọn" />
-                  {items.map((item, index) => {
-                    const box = item.box || item.Box
-                    if (!box) return null
-                    return <div key={`${item.label}-${index}`} className="bounding-box" style={{ left: `${box.x ?? box.X}px`, top: `${box.y ?? box.Y}px`, width: `${box.width ?? box.Width}px`, height: `${box.height ?? box.Height}px` }}><span>{item.label || item.Label}</span></div>
-                  })}
+                  <div className="preview-media">
+                    <img src={previewUrl} alt="Ảnh đã chọn" />
+                    {items.map((item, index) => {
+                      const box = item.box || item.Box
+                      if (!box) return null
+                      const x = box.x ?? box.X ?? 0
+                      const y = box.y ?? box.Y ?? 0
+                      const width = box.width ?? box.Width ?? 0
+                      const height = box.height ?? box.Height ?? 0
+                      const label = item.label || item.Label || 'Không xác định'
+                      const confidence = item.confidence ?? item.Confidence
+                      return <div key={`${label}-${index}`} className={`bounding-box ${hoveredItemIndex === index ? 'is-highlighted' : ''}`} style={{ left: `${(x / MODEL_INPUT_SIZE) * 100}%`, top: `${(y / MODEL_INPUT_SIZE) * 100}%`, width: `${(width / MODEL_INPUT_SIZE) * 100}%`, height: `${(height / MODEL_INPUT_SIZE) * 100}%` }} onMouseEnter={() => setHoveredItemIndex(index)} onMouseLeave={() => setHoveredItemIndex(null)}><span>{label} · {confidencePercent(confidence)}</span></div>
+                    })}
+                  </div>
                   {isLoading && <div className="scanning-line" />}
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-4 rounded-xl bg-[#eef4ee] px-4 py-3">
@@ -161,7 +173,7 @@ function App() {
               <div className="mt-10 flex items-end gap-3"><span className="font-display text-8xl font-semibold leading-none text-white">{result ? total : '—'}</span><span className="mb-2 text-sm text-[#b9d6c8]">vật thể<br />được thấy</span></div>
               <div className="mt-10 border-t border-white/15 pt-5 text-sm text-[#b9d6c8]">{result ? <span className="flex items-center gap-2 text-[#aee4bd]"><Check size={16} /> Phân tích hoàn tất</span> : 'Kết quả sẽ xuất hiện sau khi phân tích ảnh.'}</div>
             </div>
-            <div className="panel p-6"><p className="section-kicker">03 / BREAKDOWN</p><h2 className="mt-1 font-display text-2xl font-semibold">Các vật thể tìm thấy</h2>{items.length ? <div className="mt-6 space-y-4">{items.map((item, index) => <div className="result-row" key={`${item.label}-${index}`}><div className="flex min-w-0 items-center gap-3"><span className="result-index">{String(index + 1).padStart(2, '0')}</span><span className="truncate font-semibold">{item.label || item.Label}</span></div><span className="confidence">{confidencePercent(item.confidence ?? item.Confidence)}</span></div>)}</div> : <div className="empty-results mt-6"><ScanSearch size={21} /><span>Chưa có dữ liệu để hiển thị</span></div>}</div>
+            <div className="panel p-6"><p className="section-kicker">03 / BREAKDOWN</p><h2 className="mt-1 font-display text-2xl font-semibold">Các vật thể tìm thấy</h2>{items.length ? <div className="mt-6 space-y-4">{items.map((item, index) => { const label = item.label || item.Label || 'Không xác định'; const confidence = item.confidence ?? item.Confidence; return <div className={`result-row ${hoveredItemIndex === index ? 'is-highlighted' : ''}`} key={`${label}-${index}`} onMouseEnter={() => setHoveredItemIndex(index)} onMouseLeave={() => setHoveredItemIndex(null)}><div className="flex min-w-0 items-center gap-3"><span className="result-index">{String(index + 1).padStart(2, '0')}</span><span className="truncate font-semibold">{label}</span></div><span className="confidence">{confidencePercent(confidence)}</span></div> })}</div> : <div className="empty-results mt-6"><ScanSearch size={21} /><span>Chưa có dữ liệu để hiển thị</span></div>}</div>
           </aside>
         </div>
       </section>
